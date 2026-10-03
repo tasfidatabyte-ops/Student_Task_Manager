@@ -758,3 +758,308 @@ function toLocalDateInputValue(date) {
 function prefersReducedMotion() {
   return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 }
+
+/* ========================================================================== 
+   Compact multi-view dashboard enhancements
+   ========================================================================== */
+
+const UI_STORAGE_KEYS = Object.freeze({
+  activeView: "taskflow.activeView.v1",
+  sidebarCollapsed: "taskflow.sidebarCollapsed.v1"
+});
+
+let calendarCursor = new Date();
+
+document.addEventListener("DOMContentLoaded", initDashboardEnhancements);
+
+function initDashboardEnhancements() {
+  cacheDashboardElements();
+  bindDashboardEvents();
+  restoreSidebarPreference();
+  const initialView = getInitialView();
+  switchView(initialView, { updateHash: false, focus: false });
+  renderExtendedViews();
+}
+
+function cacheDashboardElements() {
+  elements.sidebarToggle = document.getElementById("sidebar-toggle");
+  elements.viewTitle = document.getElementById("view-title");
+  elements.appViews = [...document.querySelectorAll(".app-view")];
+  elements.viewLinks = [...document.querySelectorAll("[data-view-link]")];
+  elements.calendarPrevious = document.getElementById("calendar-previous");
+  elements.calendarToday = document.getElementById("calendar-today");
+  elements.calendarNext = document.getElementById("calendar-next");
+  elements.calendarMonth = document.getElementById("calendar-month");
+  elements.calendarGrid = document.getElementById("calendar-grid");
+  elements.calendarEmptyState = document.getElementById("calendar-empty-state");
+  elements.analyticsTotalTasks = document.getElementById("analytics-total-tasks");
+  elements.analyticsCompletionRate = document.getElementById("analytics-completion-rate");
+  elements.analyticsHighPriority = document.getElementById("analytics-high-priority");
+  elements.analyticsOverdue = document.getElementById("analytics-overdue");
+  elements.categoryAssignmentCount = document.getElementById("category-assignment-count");
+  elements.categoryProjectCount = document.getElementById("category-project-count");
+  elements.categoryExamCount = document.getElementById("category-exam-count");
+  elements.categoryPersonalCount = document.getElementById("category-personal-count");
+  elements.categoryList = document.getElementById("category-list");
+  elements.settingsThemeToggle = document.getElementById("settings-theme-toggle");
+  elements.exportTasks = document.getElementById("export-tasks");
+  elements.importTasks = document.getElementById("import-tasks");
+  elements.importTasksFile = document.getElementById("import-tasks-file");
+}
+
+function bindDashboardEvents() {
+  elements.sidebarToggle?.addEventListener("click", toggleSidebarCollapsed);
+  elements.viewLinks.forEach((link) => link.addEventListener("click", (event) => {
+    event.preventDefault();
+    switchView(link.dataset.viewLink);
+  }));
+  elements.calendarPrevious?.addEventListener("click", () => changeCalendarMonth(-1));
+  elements.calendarToday?.addEventListener("click", () => {
+    calendarCursor = new Date();
+    renderCalendar();
+  });
+  elements.calendarNext?.addEventListener("click", () => changeCalendarMonth(1));
+  elements.categoryList?.addEventListener("click", handleCategoryCardClick);
+  elements.settingsThemeToggle?.addEventListener("click", toggleTheme);
+  elements.exportTasks?.addEventListener("click", exportTasksToJson);
+  elements.importTasks?.addEventListener("click", () => elements.importTasksFile?.click());
+  elements.importTasksFile?.addEventListener("change", importTasksFromJson);
+  window.addEventListener("hashchange", handleHashNavigation);
+}
+
+function getInitialView() {
+  const hashView = window.location.hash.slice(1);
+  const storedView = localStorage.getItem(UI_STORAGE_KEYS.activeView);
+  return isValidView(hashView) ? hashView : isValidView(storedView) ? storedView : "dashboard";
+}
+
+function isValidView(viewId) {
+  return Boolean(viewId && document.getElementById(viewId)?.classList.contains("app-view"));
+}
+
+function switchView(viewId, options = {}) {
+  const { updateHash = true, focus = true } = options;
+  if (!isValidView(viewId)) viewId = "dashboard";
+
+  elements.appViews.forEach((view) => {
+    const active = view.id === viewId;
+    view.classList.toggle("is-active", active);
+    view.hidden = !active;
+  });
+
+  elements.navLinks.forEach((link) => {
+    const active = link.dataset.view === viewId;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+
+  const view = document.getElementById(viewId);
+  setElementText(elements.viewTitle, view?.dataset.viewTitle || "TaskFlow");
+  localStorage.setItem(UI_STORAGE_KEYS.activeView, viewId);
+
+  if (updateHash && window.location.hash !== `#${viewId}`) {
+    history.pushState(null, "", `#${viewId}`);
+  }
+
+  if (viewId === "calendar") renderCalendar();
+  if (viewId === "analytics") updateExtendedAnalytics();
+  if (viewId === "categories") updateCategoryCounts();
+  if (viewId === "tasks") renderTasks();
+
+  if (focus) document.getElementById("main-content")?.focus({ preventScroll: true });
+  if (window.innerWidth < 1200) closeSidebar();
+}
+
+function handleHashNavigation() {
+  const viewId = window.location.hash.slice(1);
+  if (isValidView(viewId)) switchView(viewId, { updateHash: false });
+}
+
+function toggleSidebarCollapsed() {
+  const collapsed = document.body.classList.toggle("sidebar-collapsed");
+  localStorage.setItem(UI_STORAGE_KEYS.sidebarCollapsed, String(collapsed));
+  updateSidebarToggle(collapsed);
+}
+
+function restoreSidebarPreference() {
+  const collapsed = localStorage.getItem(UI_STORAGE_KEYS.sidebarCollapsed) === "true";
+  document.body.classList.toggle("sidebar-collapsed", collapsed && window.innerWidth >= 1200);
+  updateSidebarToggle(collapsed && window.innerWidth >= 1200);
+}
+
+function updateSidebarToggle(collapsed) {
+  if (!elements.sidebarToggle) return;
+  elements.sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+  elements.sidebarToggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+  const icon = elements.sidebarToggle.querySelector("span");
+  if (icon) icon.textContent = collapsed ? "›" : "‹";
+}
+
+/* ---------- Calendar ---------- */
+function changeCalendarMonth(offset) {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + offset, 1);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  if (!elements.calendarGrid || !elements.calendarMonth) return;
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const monthTasks = state.tasks.filter((task) => {
+    if (!task.deadline) return false;
+    const date = new Date(`${task.deadline}T12:00:00`);
+    return date.getFullYear() === year && date.getMonth() === month;
+  });
+
+  elements.calendarMonth.textContent = new Intl.DateTimeFormat(undefined, {
+    month: "long", year: "numeric"
+  }).format(firstDay);
+  elements.calendarGrid.replaceChildren();
+  elements.calendarGrid.classList.add("calendar-grid");
+
+  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((day) => {
+    const heading = document.createElement("div");
+    heading.className = "calendar-weekday";
+    heading.textContent = day;
+    elements.calendarGrid.append(heading);
+  });
+
+  for (let index = 0; index < firstDay.getDay(); index += 1) {
+    const spacer = document.createElement("div");
+    spacer.className = "calendar-day calendar-day--empty";
+    spacer.setAttribute("aria-hidden", "true");
+    elements.calendarGrid.append(spacer);
+  }
+
+  const todayValue = toLocalDateInputValue(new Date());
+  for (let day = 1; day <= lastDay.getDate(); day += 1) {
+    const dateValue = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dayTasks = monthTasks.filter((task) => task.deadline === dateValue);
+    const cell = document.createElement("article");
+    cell.className = "calendar-day";
+    if (dateValue === todayValue) cell.classList.add("is-today");
+
+    const number = document.createElement("strong");
+    number.className = "calendar-day__number";
+    number.textContent = day;
+    cell.append(number);
+
+    dayTasks.slice(0, 3).forEach((task) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `calendar-task calendar-task--${task.priority}`;
+      button.textContent = task.title;
+      button.title = task.title;
+      button.addEventListener("click", () => openTaskModal(task.id));
+      cell.append(button);
+    });
+
+    if (dayTasks.length > 3) {
+      const more = document.createElement("small");
+      more.textContent = `+${dayTasks.length - 3} more`;
+      cell.append(more);
+    }
+    elements.calendarGrid.append(cell);
+  }
+
+  if (elements.calendarEmptyState) elements.calendarEmptyState.hidden = monthTasks.length > 0;
+}
+
+/* ---------- Analytics and categories ---------- */
+function renderExtendedViews() {
+  renderCalendar();
+  updateExtendedAnalytics();
+  updateCategoryCounts();
+}
+
+function updateExtendedAnalytics() {
+  const total = state.tasks.length;
+  const completed = state.tasks.filter((task) => task.status === "completed").length;
+  setElementText(elements.analyticsTotalTasks, total);
+  setElementText(elements.analyticsCompletionRate, `${total ? Math.round((completed / total) * 100) : 0}%`);
+  setElementText(elements.analyticsHighPriority, state.tasks.filter((task) => task.priority === "high").length);
+  setElementText(elements.analyticsOverdue, state.tasks.filter(isOverdue).length);
+}
+
+function updateCategoryCounts() {
+  const count = (category) => state.tasks.filter((task) => task.category === category).length;
+  setElementText(elements.categoryAssignmentCount, count("assignment"));
+  setElementText(elements.categoryProjectCount, count("project"));
+  setElementText(elements.categoryExamCount, count("exam"));
+  setElementText(elements.categoryPersonalCount, count("personal"));
+}
+
+function handleCategoryCardClick(event) {
+  const card = event.target.closest("[data-category]");
+  if (!card) return;
+  state.categoryFilter = card.dataset.category;
+  if (elements.categoryFilter) elements.categoryFilter.value = state.categoryFilter;
+  switchView("tasks");
+  renderTasks();
+}
+
+/* ---------- Settings import and export ---------- */
+function exportTasksToJson() {
+  const blob = new Blob([JSON.stringify(state.tasks, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `taskflow-backup-${toLocalDateInputValue(new Date())}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("Tasks exported", "A JSON backup was downloaded.", "success");
+}
+
+async function importTasksFromJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    if (!Array.isArray(parsed)) throw new Error("The JSON root must be an array.");
+    const imported = parsed.map(normalizeTask).filter(Boolean);
+    if (!imported.length && parsed.length) throw new Error("No valid tasks were found.");
+    state.tasks = imported;
+    saveTasks();
+    renderApp();
+    renderExtendedViews();
+    showToast("Tasks imported", `${imported.length} task${imported.length === 1 ? "" : "s"} loaded.`, "success");
+  } catch (error) {
+    console.error("Import failed:", error);
+    showToast("Import failed", "Choose a valid TaskFlow JSON backup.", "error");
+  } finally {
+    event.target.value = "";
+  }
+}
+
+/* Extend existing functions without changing their original behavior. */
+const originalRenderApp = renderApp;
+renderApp = function enhancedRenderApp() {
+  originalRenderApp();
+  renderExtendedViews();
+};
+
+const originalHandleNavigation = handleNavigation;
+handleNavigation = function enhancedHandleNavigation(event) {
+  event.preventDefault();
+  const viewId = event.currentTarget.dataset.view || event.currentTarget.getAttribute("href")?.slice(1);
+  if (isValidView(viewId)) switchView(viewId);
+  else originalHandleNavigation(event);
+};
+
+const originalHandleSearch = handleSearch;
+handleSearch = function enhancedHandleSearch(event) {
+  originalHandleSearch(event);
+  if (event.target.value.trim()) switchView("tasks");
+};
+
+const originalHandleResize = handleResize;
+handleResize = function enhancedHandleResize() {
+  originalHandleResize();
+  if (window.innerWidth < 1200) document.body.classList.remove("sidebar-collapsed");
+  else restoreSidebarPreference();
+};
