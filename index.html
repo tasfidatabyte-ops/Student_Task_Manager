@@ -28,9 +28,8 @@
             <small class="brand__tagline">Student Planner</small>
           </span>
         </a>
-
-        <button class="icon-button sidebar__close" id="sidebar-close" type="button" aria-label="Close navigation">
-          <span aria-hidden="true">&times;</span>
+        <button class="icon-button sidebar__toggle" id="sidebar-toggle" type="button" aria-label="Collapse sidebar" aria-controls="sidebar" aria-expanded="true">
+          <span aria-hidden="true">‹</span>
         </button>
       </div>
 
@@ -69,9 +68,10 @@
       <header class="topbar">
         <div class="topbar__start">
           <button class="icon-button menu-button" id="sidebar-open" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
-          <div>
+          <div class="topbar__heading">
             <p class="eyebrow" id="current-date">Today</p>
-            <h1 class="topbar__title">Welcome back, <span id="student-name">Student</span></h1>
+            <h1 class="topbar__title" id="view-title">Dashboard</h1>
+            <p class="topbar__subtitle">Welcome back, <span id="student-name">Student</span></p>
           </div>
         </div>
 
@@ -95,15 +95,17 @@
       </header>
 
       <main class="main-content" id="main-content" tabindex="-1">
+        <!-- ========================= DASHBOARD VIEW ========================= -->
+        <div class="app-view is-active" id="dashboard" data-view-title="Dashboard">
         <!-- ========================= DASHBOARD HERO ========================= -->
-        <section class="hero" id="dashboard" aria-labelledby="hero-title">
+        <section class="hero" aria-labelledby="hero-title">
           <div class="hero__content">
             <span class="hero__badge">Plan smarter. Finish stronger.</span>
             <h2 id="hero-title">Turn assignments into achievements.</h2>
             <p>Organize coursework, monitor deadlines, and keep every important task under control from one focused workspace.</p>
             <div class="hero__actions">
               <button class="button button--light" id="hero-add-task" type="button">Create a task</button>
-              <a class="button button--ghost-light" href="#tasks">View task board</a>
+              <a class="button button--ghost-light" href="#tasks" data-view-link="tasks">View task board</a>
             </div>
           </div>
 
@@ -151,9 +153,10 @@
             </article>
           </div>
         </section>
+        </div>
 
         <!-- ========================= TASK BOARD ========================= -->
-        <section class="dashboard-section" id="tasks" aria-labelledby="tasks-title">
+        <section class="dashboard-section app-view" id="tasks" data-view-title="My Tasks" aria-labelledby="tasks-title" hidden>
           <div class="section-heading section-heading--tasks">
             <div>
               <p class="eyebrow">Task board</p>
@@ -197,6 +200,114 @@
             <h3>No tasks here yet</h3>
             <p>Create your first task and start building a more organized study routine.</p>
             <button class="button button--primary" id="empty-add-task" type="button">Create first task</button>
+          </div>
+        </section>
+
+        <!-- ========================= CALENDAR ========================= -->
+        <section class="dashboard-section app-view" id="calendar" data-view-title="Calendar" aria-labelledby="calendar-title" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Schedule</p>
+              <h2 id="calendar-title">Task calendar</h2>
+            </div>
+            <div class="toolbar-controls" aria-label="Calendar controls">
+              <button class="button button--secondary button--small" id="calendar-previous" type="button" aria-label="Show previous month">Previous</button>
+              <button class="button button--secondary button--small" id="calendar-today" type="button">Today</button>
+              <button class="button button--secondary button--small" id="calendar-next" type="button" aria-label="Show next month">Next</button>
+            </div>
+          </div>
+          <div class="task-toolbar">
+            <h3 id="calendar-month" aria-live="polite">Current month</h3>
+          </div>
+          <div class="task-list" id="calendar-grid" aria-label="Calendar days" aria-live="polite"></div>
+          <div class="empty-state" id="calendar-empty-state">
+            <div class="empty-state__illustration" aria-hidden="true">□</div>
+            <h3>No scheduled tasks</h3>
+            <p>Tasks with due dates will appear in the calendar.</p>
+          </div>
+        </section>
+
+        <!-- ========================= ANALYTICS ========================= -->
+        <section class="dashboard-section app-view" id="analytics" data-view-title="Analytics" aria-labelledby="analytics-title" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Performance</p>
+              <h2 id="analytics-title">Task analytics</h2>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <article class="stat-card stat-card--primary">
+              <div class="stat-card__icon" aria-hidden="true">▣</div>
+              <div><span>Total tasks</span><strong id="analytics-total-tasks">0</strong><small>All recorded tasks</small></div>
+            </article>
+            <article class="stat-card stat-card--success">
+              <div class="stat-card__icon" aria-hidden="true">✓</div>
+              <div><span>Completion rate</span><strong id="analytics-completion-rate">0%</strong><small>Tasks completed</small></div>
+            </article>
+            <article class="stat-card stat-card--warning">
+              <div class="stat-card__icon" aria-hidden="true">!</div>
+              <div><span>High priority</span><strong id="analytics-high-priority">0</strong><small>Important tasks</small></div>
+            </article>
+            <article class="stat-card stat-card--danger">
+              <div class="stat-card__icon" aria-hidden="true">◷</div>
+              <div><span>Overdue</span><strong id="analytics-overdue">0</strong><small>Tasks needing attention</small></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========================= CATEGORIES ========================= -->
+        <section class="dashboard-section app-view" id="categories" data-view-title="Categories" aria-labelledby="categories-title" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Organization</p>
+              <h2 id="categories-title">Task categories</h2>
+            </div>
+          </div>
+          <div class="stats-grid" id="category-list">
+            <article class="stat-card stat-card--primary" data-category="assignment">
+              <div class="stat-card__icon" aria-hidden="true">A</div>
+              <div><span>Assignment</span><strong id="category-assignment-count">0</strong><small>Coursework and submissions</small></div>
+            </article>
+            <article class="stat-card stat-card--success" data-category="project">
+              <div class="stat-card__icon" aria-hidden="true">P</div>
+              <div><span>Project</span><strong id="category-project-count">0</strong><small>Individual and team projects</small></div>
+            </article>
+            <article class="stat-card stat-card--warning" data-category="exam">
+              <div class="stat-card__icon" aria-hidden="true">E</div>
+              <div><span>Exam preparation</span><strong id="category-exam-count">0</strong><small>Revision and practice</small></div>
+            </article>
+            <article class="stat-card stat-card--danger" data-category="personal">
+              <div class="stat-card__icon" aria-hidden="true">P</div>
+              <div><span>Personal</span><strong id="category-personal-count">0</strong><small>Personal study activities</small></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========================= SETTINGS ========================= -->
+        <section class="dashboard-section app-view" id="settings" data-view-title="Settings" aria-labelledby="settings-title" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Preferences</p>
+              <h2 id="settings-title">Application settings</h2>
+            </div>
+          </div>
+          <div class="task-toolbar">
+            <div>
+              <h3>Appearance</h3>
+              <p>Use the theme button in the top navigation to switch between light and dark mode.</p>
+            </div>
+            <button class="button button--secondary" id="settings-theme-toggle" type="button">Switch theme</button>
+          </div>
+          <div class="task-toolbar">
+            <div>
+              <h3>Task data</h3>
+              <p>Manage the task information saved in this browser.</p>
+            </div>
+            <div class="toolbar-controls">
+              <button class="button button--secondary button--small" id="export-tasks" type="button">Export tasks</button>
+              <button class="button button--secondary button--small" id="import-tasks" type="button">Import tasks</button>
+              <input class="sr-only" id="import-tasks-file" type="file" accept="application/json">
+            </div>
           </div>
         </section>
       </main>
