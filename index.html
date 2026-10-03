@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow is a modern student task manager for planning assignments, deadlines, and study activities.">
+  <meta name="theme-color" content="#5b5bd6">
+  <title>TaskFlow | Student Task Manager</title>
+
+  <!-- Main project stylesheet. Add all visual design in style.css. -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- JavaScript is deferred so the HTML loads before script.js executes. -->
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <!-- Allows keyboard users to bypass the navigation. -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="app-shell" id="app">
+    <!-- ========================= SIDEBAR ========================= -->
+    <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+      <div class="sidebar__header">
+        <a class="brand" href="#dashboard" aria-label="TaskFlow home">
+          <span class="brand__mark" aria-hidden="true">TF</span>
+          <span class="brand__content">
+            <strong class="brand__name">TaskFlow</strong>
+            <small class="brand__tagline">Student Planner</small>
+          </span>
+        </a>
+
+        <button class="icon-button sidebar__close" id="sidebar-close" type="button" aria-label="Close navigation">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <nav class="sidebar__nav">
+        <p class="sidebar__label">Workspace</p>
+        <ul class="nav-list">
+          <li><a class="nav-link is-active" href="#dashboard" data-view="dashboard" aria-current="page"><span aria-hidden="true">⌂</span><span>Dashboard</span></a></li>
+          <li><a class="nav-link" href="#tasks" data-view="tasks"><span aria-hidden="true">✓</span><span>My Tasks</span><span class="nav-link__count" id="sidebar-task-count">0</span></a></li>
+          <li><a class="nav-link" href="#calendar" data-view="calendar"><span aria-hidden="true">□</span><span>Calendar</span></a></li>
+          <li><a class="nav-link" href="#analytics" data-view="analytics"><span aria-hidden="true">↗</span><span>Analytics</span></a></li>
+        </ul>
+
+        <p class="sidebar__label">Manage</p>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#categories" data-view="categories"><span aria-hidden="true">◇</span><span>Categories</span></a></li>
+          <li><a class="nav-link" href="#settings" data-view="settings"><span aria-hidden="true">⚙</span><span>Settings</span></a></li>
+        </ul>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="profile-card">
+          <div class="avatar" aria-hidden="true">ST</div>
+          <div class="profile-card__content">
+            <strong id="profile-name">Student</strong>
+            <span id="profile-role">Project Member</span>
+          </div>
+          <button class="icon-button" id="profile-menu-button" type="button" aria-label="Open profile menu" aria-haspopup="menu">⋮</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" hidden></div>
+
+    <!-- ========================= MAIN AREA ========================= -->
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar__start">
+          <button class="icon-button menu-button" id="sidebar-open" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">☰</button>
+          <div>
+            <p class="eyebrow" id="current-date">Today</p>
+            <h1 class="topbar__title">Welcome back, <span id="student-name">Student</span></h1>
+          </div>
+        </div>
+
+        <div class="topbar__actions">
+          <label class="global-search" for="global-search-input">
+            <span class="sr-only">Search tasks</span>
+            <span aria-hidden="true">⌕</span>
+            <input id="global-search-input" name="search" type="search" placeholder="Search tasks..." autocomplete="off">
+            <kbd>Ctrl K</kbd>
+          </label>
+
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch color theme" aria-pressed="false">◐</button>
+          <button class="icon-button notification-button" id="notification-button" type="button" aria-label="Open notifications">
+            <span aria-hidden="true">♢</span>
+            <span class="notification-button__dot" id="notification-dot" aria-hidden="true"></span>
+          </button>
+          <button class="button button--primary" id="open-task-modal" type="button">
+            <span aria-hidden="true">＋</span> Add Task
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content" id="main-content" tabindex="-1">
+        <!-- ========================= DASHBOARD HERO ========================= -->
+        <section class="hero" id="dashboard" aria-labelledby="hero-title">
+          <div class="hero__content">
+            <span class="hero__badge">Plan smarter. Finish stronger.</span>
+            <h2 id="hero-title">Turn assignments into achievements.</h2>
+            <p>Organize coursework, monitor deadlines, and keep every important task under control from one focused workspace.</p>
+            <div class="hero__actions">
+              <button class="button button--light" id="hero-add-task" type="button">Create a task</button>
+              <a class="button button--ghost-light" href="#tasks">View task board</a>
+            </div>
+          </div>
+
+          <div class="hero__progress" aria-label="Weekly completion summary">
+            <div class="progress-ring" id="completion-ring" style="--progress: 0">
+              <div class="progress-ring__center">
+                <strong id="completion-percentage">0%</strong>
+                <span>completed</span>
+              </div>
+            </div>
+            <p><strong id="weekly-completed-count">0</strong> tasks finished this week</p>
+          </div>
+        </section>
+
+        <!-- ========================= STATISTICS ========================= -->
+        <section class="dashboard-section" aria-labelledby="overview-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Live overview</p>
+              <h2 id="overview-title">Your productivity at a glance</h2>
+            </div>
+            <select class="select-control" id="statistics-period" aria-label="Statistics period">
+              <option value="week">This week</option>
+              <option value="month">This month</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card stat-card--primary">
+              <div class="stat-card__icon" aria-hidden="true">▣</div>
+              <div><span>Total tasks</span><strong id="total-tasks">0</strong><small id="total-task-trend">Start by adding a task</small></div>
+            </article>
+            <article class="stat-card stat-card--success">
+              <div class="stat-card__icon" aria-hidden="true">✓</div>
+              <div><span>Completed</span><strong id="completed-tasks">0</strong><small id="completion-rate">0% completion rate</small></div>
+            </article>
+            <article class="stat-card stat-card--warning">
+              <div class="stat-card__icon" aria-hidden="true">◷</div>
+              <div><span>In progress</span><strong id="progress-tasks">0</strong><small>Keep the momentum going</small></div>
+            </article>
+            <article class="stat-card stat-card--danger">
+              <div class="stat-card__icon" aria-hidden="true">!</div>
+              <div><span>Overdue</span><strong id="overdue-tasks">0</strong><small id="overdue-message">No overdue tasks</small></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========================= TASK BOARD ========================= -->
+        <section class="dashboard-section" id="tasks" aria-labelledby="tasks-title">
+          <div class="section-heading section-heading--tasks">
+            <div>
+              <p class="eyebrow">Task board</p>
+              <h2 id="tasks-title">Manage your tasks</h2>
+            </div>
+            <button class="button button--primary button--small" id="board-add-task" type="button">＋ New task</button>
+          </div>
+
+          <div class="task-toolbar" aria-label="Task controls">
+            <div class="filter-tabs" role="group" aria-label="Filter by status">
+              <button class="filter-tab is-active" type="button" data-filter="all" aria-pressed="true">All <span id="all-count">0</span></button>
+              <button class="filter-tab" type="button" data-filter="todo" aria-pressed="false">To do <span id="todo-count">0</span></button>
+              <button class="filter-tab" type="button" data-filter="in-progress" aria-pressed="false">In progress <span id="in-progress-count">0</span></button>
+              <button class="filter-tab" type="button" data-filter="completed" aria-pressed="false">Completed <span id="completed-count">0</span></button>
+            </div>
+
+            <div class="toolbar-controls">
+              <select class="select-control" id="category-filter" aria-label="Filter by category">
+                <option value="all">All categories</option>
+                <option value="assignment">Assignment</option>
+                <option value="project">Project</option>
+                <option value="exam">Exam preparation</option>
+                <option value="personal">Personal</option>
+                <option value="other">Other</option>
+              </select>
+
+              <select class="select-control" id="sort-tasks" aria-label="Sort tasks">
+                <option value="newest">Newest first</option>
+                <option value="deadline">Nearest deadline</option>
+                <option value="priority">Highest priority</option>
+                <option value="title">Title A to Z</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- script.js will render task cards inside this container. -->
+          <div class="task-list" id="task-list" aria-live="polite" aria-busy="false"></div>
+
+          <div class="empty-state" id="empty-state">
+            <div class="empty-state__illustration" aria-hidden="true">✓</div>
+            <h3>No tasks here yet</h3>
+            <p>Create your first task and start building a more organized study routine.</p>
+            <button class="button button--primary" id="empty-add-task" type="button">Create first task</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>&copy; <span id="current-year"></span> TaskFlow. Built for productive students.</p>
+        <p><span class="status-dot" aria-hidden="true"></span> All changes saved locally</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========================= ADD / EDIT TASK MODAL ========================= -->
+  <dialog class="task-modal" id="task-modal" aria-labelledby="task-modal-title">
+    <form class="task-form" id="task-form" method="dialog" novalidate>
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Task details</p>
+          <h2 id="task-modal-title">Create a new task</h2>
+          <p id="task-modal-description">Add clear details so the task is easy to understand and complete.</p>
+        </div>
+        <button class="icon-button" id="close-task-modal" type="button" aria-label="Close task form">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Used by script.js when editing an existing task. -->
+        <input id="task-id" name="taskId" type="hidden">
+
+        <div class="form-group form-group--full">
+          <label for="task-title">Task title <span aria-hidden="true">*</span></label>
+          <input id="task-title" name="title" type="text" placeholder="e.g. Complete Git and GitHub assignment" minlength="3" maxlength="100" autocomplete="off" required aria-describedby="task-title-help task-title-error">
+          <div class="field-meta">
+            <small id="task-title-help">Use a short, action-focused title.</small>
+            <small><span id="title-character-count">0</span>/100</small>
+          </div>
+          <small class="field-error" id="task-title-error" aria-live="polite"></small>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label for="task-description">Description</label>
+          <textarea id="task-description" name="description" rows="4" maxlength="500" placeholder="Add requirements, useful notes, or the expected result..." aria-describedby="description-count"></textarea>
+          <small class="field-meta" id="description-count"><span id="description-character-count">0</span>/500 characters</small>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="task-category">Category <span aria-hidden="true">*</span></label>
+            <select id="task-category" name="category" required>
+              <option value="" selected disabled>Select category</option>
+              <option value="assignment">Assignment</option>
+              <option value="project">Project</option>
+              <option value="exam">Exam preparation</option>
+              <option value="personal">Personal</option>
+              <option value="other">Other</option>
+            </select>
+            <small class="field-error" id="task-category-error" aria-live="polite"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="task-subject">Subject or course</label>
+            <input id="task-subject" name="subject" type="text" maxlength="60" placeholder="e.g. Web Engineering" list="subject-suggestions">
+            <datalist id="subject-suggestions">
+              <option value="Web Engineering"></option>
+              <option value="Data Structures"></option>
+              <option value="Linear Algebra"></option>
+              <option value="Probability and Statistics"></option>
+            </datalist>
+          </div>
+
+          <fieldset class="form-group priority-selector">
+            <legend>Priority <span aria-hidden="true">*</span></legend>
+            <div class="segmented-control">
+              <input id="priority-low" name="priority" type="radio" value="low">
+              <label for="priority-low"><span class="priority-dot priority-dot--low"></span>Low</label>
+
+              <input id="priority-medium" name="priority" type="radio" value="medium" checked>
+              <label for="priority-medium"><span class="priority-dot priority-dot--medium"></span>Medium</label>
+
+              <input id="priority-high" name="priority" type="radio" value="high">
+              <label for="priority-high"><span class="priority-dot priority-dot--high"></span>High</label>
+            </div>
+          </fieldset>
+
+          <div class="form-group">
+            <label for="task-status">Status</label>
+            <select id="task-status" name="status">
+              <option value="todo" selected>To do</option>
+              <option value="in-progress">In progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-deadline">Due date <span aria-hidden="true">*</span></label>
+            <input id="task-deadline" name="deadline" type="date" required>
+            <small class="field-error" id="task-deadline-error" aria-live="polite"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="task-time">Due time</label>
+            <input id="task-time" name="dueTime" type="time">
+          </div>
+
+          <div class="form-group">
+            <label for="task-estimate">Estimated effort</label>
+            <select id="task-estimate" name="estimatedMinutes">
+              <option value="">Not specified</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+              <option value="120">2 hours</option>
+              <option value="240">4 hours</option>
+              <option value="480">1 day</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-reminder">Reminder</label>
+            <select id="task-reminder" name="reminder">
+              <option value="none">No reminder</option>
+              <option value="at-time">At due time</option>
+              <option value="30-minutes">30 minutes before</option>
+              <option value="1-hour">1 hour before</option>
+              <option value="1-day">1 day before</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label for="task-tags">Tags</label>
+          <input id="task-tags" name="tags" type="text" maxlength="100" placeholder="e.g. github, semester-3, important" aria-describedby="task-tags-help">
+          <small id="task-tags-help">Separate multiple tags with commas.</small>
+        </div>
+
+        <label class="checkbox-control">
+          <input id="task-starred" name="starred" type="checkbox">
+          <span>Mark this task as important</span>
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="button button--secondary" id="cancel-task" type="button">Cancel</button>
+        <button class="button button--primary" id="save-task" type="submit">
+          <span aria-hidden="true">＋</span><span id="save-task-label">Create task</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ========================= REUSABLE UI TEMPLATES ========================= -->
+  <!-- script.js can clone this template for every task object. -->
+  <template id="task-card-template">
+    <article class="task-card" data-task-id="">
+      <button class="task-card__complete" type="button" aria-label="Mark task as completed"><span aria-hidden="true">✓</span></button>
+      <div class="task-card__body">
+        <div class="task-card__topline">
+          <span class="badge task-card__category"></span>
+          <span class="priority-badge task-card__priority"></span>
+        </div>
+        <h3 class="task-card__title"></h3>
+        <p class="task-card__description"></p>
+        <div class="task-card__tags"></div>
+        <div class="task-card__meta">
+          <span class="task-card__subject"></span>
+          <time class="task-card__deadline"></time>
+        </div>
+      </div>
+      <div class="task-card__actions">
+        <button class="icon-button task-card__star" type="button" aria-label="Toggle important task">☆</button>
+        <button class="icon-button task-card__edit" type="button" aria-label="Edit task">✎</button>
+        <button class="icon-button task-card__delete" type="button" aria-label="Delete task">⌫</button>
+      </div>
+    </article>
+  </template>
+
+  <!-- Toast messages are inserted here by script.js. -->
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <template id="toast-template">
+    <div class="toast" role="status">
+      <span class="toast__icon" aria-hidden="true"></span>
+      <div class="toast__content"><strong class="toast__title"></strong><p class="toast__message"></p></div>
+      <button class="toast__close" type="button" aria-label="Dismiss notification">&times;</button>
+    </div>
+  </template>
+
+  <noscript>
+    <div class="noscript-message">TaskFlow requires JavaScript for task creation, filtering, and local storage.</div>
+  </noscript>
+</body>
+</html>
