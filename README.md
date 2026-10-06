@@ -1,12 +1,16 @@
 # **Student Task Manager Application **
 
+<<<<<<< HEAD
+## Overview Of the Project
+=======
 ## Project Overview
+>>>>>>> origin/main
 
 TaskFlow is a browser-based productivity application designed for students. It combines task planning, deadline tracking, filtering, calendar organization, productivity statistics, and local data persistence in a clean multi-view interface.
 
 The project is built entirely CSS, and vanilla JavaScript. It requires no framework, package manager, build tool, database, or backend server.
 
-## Live Demo
+## Live Demo is below
 
 [Open TaskFlow on Vercel](https://taskflow-student-manager-nine.vercel.app/)
 
