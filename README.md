@@ -120,4 +120,3 @@ Recommended browsers include recent versions of Chrome, Edge, Firefox, and Safar
 
 1. Clone the repository:
 
-2. DO make it run 
