@@ -1,4 +1,4 @@
-# **Student Task Manager Application **
+# **Student Task Manager Application**
 
 ## Overview Of the Project
 
