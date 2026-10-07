@@ -496,8 +496,48 @@ Then open `index.html` in a modern browser.
 
 ![TaskFlow Dashboard](/Assets//SS_37.png)
 
+
+
 ### Git and GitHub Evidence
 
+
+![](/Assets/SS_1.png)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2010.41.03%20PM.jpeg)
+![](/Assets/Task_02.png)
+![](/Assets/Task_3.png)
+![](/Assets/Task_04.png)
+![](/Assets/Task_05.png)
+![](/Assets/Task_06.png)
+![](/Assets/Task_07.png)
+![](/Assets/Task_08.png)
+![](/Assets/Task_09.png)
+![](/Assets/Task_10.png)
+![](/Assets/Screenshot%202026-10-06%20224705.png)
+![](/Assets/Task_11.png)
+![](/Assets/Task_12.png)
+![](/Assets/Screenshot%202026-10-06%20225045.png)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2010.58.45%20PM.jpeg)
+![](/Assets/Screenshot%202026-10-06%20224202.png)
+![](/Assets/SS_14.png)
+![](/Assets/Task_18(1).png)
+![](/Assets/Task_19(22).png)
+![](/Assets/Task_20_ss_24%20(3).png)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2011.13.51%20PM%20(1).jpeg)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2011.13.51%20PM%20(3).jpeg)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2011.13.51%20PM.jpeg)
+![](/Assets/Task_20_ss_24%20(1).png)
+![](/Assets/Task_20_ss_24%20(2).png)
+![](/Assets/Task_21_ss_26.png)
+![](/Assets/Task_22_27.png)
+![](/Assets/Task_23_ss_28.png)
+![](/Assets/Task_24_ss_29.png)
+![](/Assets/WhatsApp%20Image%202026-10-07%20at%2012.02.19%20AM.jpeg)
+![](/Assets/WhatsApp%20Image%202026-10-06%20at%2011.13.51%20PM.jpeg)
+![](/Assets/WhatsApp%20Image%202026-10-07%20at%2012.02.18%20AM.jpeg)
+![](/Assets/Task_29_ss_32.png)
+![](/Assets/Task_30_34.png)
+![](/Assets/Task_35.png)
+![](/Assets/)
 - **Screenshot 3:** Repository initialization and initial status.
 - **Screenshot 4:** Staging changes with `git add`.
 - **Screenshot 5:** Creating a commit and checking status.
