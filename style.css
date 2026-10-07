@@ -1310,3 +1310,110 @@ body.sidebar-collapsed .nav-link__count {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================================
+   Issue #3: Improve responsive mobile layout
+   Tested target widths: 375px, 768px, and 1440px
+   ========================================================= */
+
+/* ---------- Global overflow protection ---------- */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+.workspace,
+.main-content,
+.app-view,
+.dashboard-section,
+.task-list,
+.stats-grid,
+.task-card,
+.task-card__body {
+  min-width: 0;
+}
+
+
+/* ---------- Desktop: 1200px and above ---------- */
+
+@media (min-width: 1200px) {
+  .workspace {
+    width: auto;
+    margin-left: var(--sidebar-width);
+  }
+
+  .main-content {
+    width: min(100%, var(--content-max));
+    padding: 1.5rem 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .task-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* ---------- Tablet and small laptop: below 1200px ---------- */
+
+@media (max-width: 1199px) {
+  .workspace {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /*
+   * Convert the sidebar into off-canvas navigation.
+   * JavaScript adds .is-open when the menu button is selected.
+   */
+  .sidebar {
+    width: min(18rem, 85vw);
+    max-width: 85vw;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transform: translateX(-105%);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay:not([hidden]) {
+    display: block;
+  }
+
+  .menu-button {
+    display: inline-flex;
+  }
+
+  .sidebar__toggle {
+    display: none;
+  }
